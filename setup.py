@@ -1,26 +1,23 @@
-#! /usr/bin/env python
-"""A template for scikit-learn compatible packages."""
-
 import codecs
 import os
 
 from setuptools import find_packages, setup
 
 # get __version__ from _version.py
-ver_file = os.path.join('skltemplate', '_version.py')
+ver_file = os.path.join('src', '_version.py')
 with open(ver_file) as f:
     exec(f.read())
 
-DISTNAME = 'sklearn-template'
-DESCRIPTION = 'A template for scikit-learn compatible packages.'
+DISTNAME = 'subgradient-svm-classifier'
+DESCRIPTION = 'A package compatible with scikit-learn.'
 with codecs.open('README.rst', encoding='utf-8-sig') as f:
     LONG_DESCRIPTION = f.read()
-MAINTAINER = 'V. Birodkars, G. Lemaitre'
-MAINTAINER_EMAIL = 'vighneshbirodkar@nyu.edu, g.lemaitre58@gmail.com'
+MAINTAINER = 'ozzwoy'
+MAINTAINER_EMAIL = 'ozzwoy@knu.ua'
 URL = 'https://github.com/scikit-learn-contrib/project-template'
 LICENSE = 'new BSD'
 DOWNLOAD_URL = 'https://github.com/scikit-learn-contrib/project-template'
-VERSION = __version__
+VERSION = '0.0.3'
 INSTALL_REQUIRES = ['numpy', 'scipy', 'scikit-learn']
 CLASSIFIERS = ['Intended Audience :: Science/Research',
                'Intended Audience :: Developers',
