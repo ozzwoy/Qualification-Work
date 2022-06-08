@@ -12,7 +12,7 @@ def data():
 
 def test_template_classifier(data):
     X, y = data
-    svm = SubgradientSVMClassifier()
+    svm = SubgradientSVMClassifier(alpha=0.01)
     svm.fit(X, y)
     assert hasattr(svm, 'classes_')
     assert hasattr(svm, 'coef_')
