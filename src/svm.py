@@ -89,6 +89,27 @@ class StepSizeRule(Enum):
             return backtracking_line_search(alpha, beta, X, y, w, loss, regularizer)
 
 
+class Kernel(Enum):
+    LINEAR="linear"
+    QUADRATIC="quadratic"
+    RBF="rbf"
+
+    @staticmethod
+    def by_name(name):
+        try:
+            return Kernel(name)
+        except ValueError:
+            raise ValueError(name + " is not a valid kernel.")
+
+    def map(self, x1, x2, gamma):
+        if self == Kernel.LINEAR:
+            return x1.dot(x2)
+        elif self == Kernel.QUADRATIC:
+            return (x1.dot(x2)) ** 2
+        elif self == Kernel.RBF:
+            return math.exp(-gamma * (x1 - x2).dot(x1 - x2))
+
+
 class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
 
     def __init__(self,
@@ -98,7 +119,9 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
                  regularizer=1e-4,
                  step_size_rule="diminishing",
                  alpha=0.1,
-                 beta=0.1):
+                 beta=0.1,
+                 kernel="linear",
+                 gamma=1e-3):
 
         self.loss = loss
         self.iterations = iterations
@@ -107,6 +130,8 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
         self.step_size_rule = step_size_rule
         self.alpha = alpha
         self.beta = beta
+        self.kernel = kernel
+        self.gamma = gamma
 
     def fit(self, X, y):
         # Check that X and y have correct shape
@@ -128,12 +153,18 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
         # The training algorithm requires the labels to be -1 and +1.
         y[y == 0] = -1
 
-        # Get loss function and step size rule objects by their names
+        # If kernelized, store the training data
+        if self.kernel != Kernel.LINEAR:
+            self.X_train_ = X
+            self.y_train_ = y
+
+        # Get loss function, step size rule and kernel objects by their names
         self.loss_ = LossFunction.by_name(self.loss)
         self.step_size_rule_ = StepSizeRule.by_name(self.step_size_rule)
+        self.kernel_ = Kernel.by_name(self.kernel)
 
         descent = SubgradientDescent(self.loss_, self.iterations, self.batch_size, self.regularizer,
-                                     self.step_size_rule_, self.alpha, self.beta)
+                                     self.step_size_rule_, self.alpha, self.beta, self.kernel_, self.gamma)
         self.coef_ = descent.execute(X, y)
         self.history_ = descent.get_last_search_history()
 
@@ -160,8 +191,9 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
         X = as_float_array(check_array(X))
 
         y = self.decision_function(X)
+        y = np.exp(y) / (1.0 + np.exp(y))
 
-        return np.array([y, 1 - y])
+        return np.vstack([1 - y, y]).T
 
     def score(self, X, y, sample_weight=None):
         # Check is fit had been called
@@ -196,7 +228,18 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
         # Check input
         X = as_float_array(check_array(X))
 
-        return X.dot(self.coef_)
+        if self.kernel_ == Kernel.LINEAR:
+            return X.dot(self.coef_)
+        else:
+            result = []
+
+            for x in X:
+                decision = 0
+                for i in range(len(self.y_train_)):
+                    decision += self.coef_[i] * self.y_train_[i] * self.kernel_.map(self.X_train_[i], x, self.gamma)
+                result.append(decision)
+
+            return np.array(result)
 
     def _more_tags(self):
         return {'binary_only': True}
