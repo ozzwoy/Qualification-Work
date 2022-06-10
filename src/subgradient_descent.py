@@ -28,8 +28,7 @@ class SubgradientDescent:
     def execute(self, X, y):
         joined = []
         current = np.zeros(len(X[0]))
-        arg_min = current
-        f_min = self.loss.value_at(X, y, arg_min, self.regularizer)
+        f_min = float("inf")
         self.history.append(current)
 
         for i in range(self.iterations):
@@ -45,10 +44,10 @@ class SubgradientDescent:
                 subgradient = self.loss.subgradient_at(batch[:, :-1], np.array(batch[:, -1]).flatten(), current,
                                                        self.regularizer)
 
-            # f = self.loss.value_at(X, y, current, self.regularizer)
-            # if f < f_min:
-            #     f_min = f
-            #     arg_min = current
+            if self.step_size_rule.value == "polyak":
+                f = self.loss.value_at(X, y, current, self.regularizer)
+                if f < f_min:
+                    f_min = f
 
             step = self.step_size_rule.next_step(self.alpha, self.beta, i, X, y, f_min, current, self.loss,
                                                  self.regularizer)

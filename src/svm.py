@@ -152,6 +152,17 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
 
         return y
 
+    def predict_proba(self, X):
+        # Check is fit had been called
+        check_is_fitted(self, ['coef_', 'history_'])
+
+        # Check input
+        X = as_float_array(check_array(X))
+
+        y = self.decision_function(X)
+
+        return np.array([y, 1 - y])
+
     def score(self, X, y, sample_weight=None):
         # Check is fit had been called
         check_is_fitted(self, ['coef_', 'history_'])

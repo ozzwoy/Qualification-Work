@@ -8,13 +8,13 @@ from sklearn.model_selection import cross_validate
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 
-from examples.data_loader import load_data
-from src.svm import SubgradientSVMClassifier
+from data_loader import load_data
+from ..svm import SubgradientSVMClassifier
 
 
 def evaluate_estimator(estimator, X, y):
     cv_results = cross_validate(estimator, X, y, cv=5, scoring="accuracy", return_train_score=True)
-    return np.mean(cv_results["fit_time"]), np.max(cv_results["train_score"]), np.max(cv_results["test_score"])
+    return np.mean(cv_results["fit_time"]), np.mean(cv_results["train_score"]), np.mean(cv_results["test_score"])
 
 
 def create_measures_plot(title, x_label, y_label):
