@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 def load_data(dataset):
     if dataset == "adult":
         return __load_adult("data/adult.data")
+    elif dataset == "custom":
+        return __load_custom("data/custom.data")
     raise ValueError("Dataset " + dataset + " doesn't exist.")
 
 
@@ -46,5 +48,18 @@ def __load_adult(filepath):
     # scaler = StandardScaler()
     # scaler.fit(X)
     # X = scaler.transform(X)
+
+    return X, y
+
+
+def __load_custom(filepath):
+    headers = ["1", "2", "class"]
+
+    data = pd.read_csv(filepath, sep=r"\s*,\s*", engine="python", names=headers, na_values="?")
+
+    data = data.to_numpy()
+
+    X = np.delete(data, -1, 1)
+    y = data[:, -1]
 
     return X, y

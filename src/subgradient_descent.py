@@ -13,7 +13,9 @@ class SubgradientDescent:
                  reularizer,
                  step_size_rule,
                  alpha,
-                 beta):
+                 beta,
+                 kernel,
+                 gamma):
 
         self.loss = loss
         self.iterations = iterations
@@ -22,10 +24,18 @@ class SubgradientDescent:
         self.step_size_rule = step_size_rule
         self.alpha = alpha
         self.beta = beta
+        self.kernel = kernel
+        self.gamma = gamma
 
         self.history = []
 
     def execute(self, X, y):
+        if self.kernel.value == "linear":
+            return self.__execute_simple(X, y)
+        else:
+            return self.__execute_kernelized(X, y)
+
+    def __execute_simple(self, X, y):
         joined = []
         current = np.zeros(len(X[0]))
         f_min = float("inf")
@@ -53,6 +63,22 @@ class SubgradientDescent:
                                                  self.regularizer)
             current = current - step * subgradient
             self.history.append(current)
+
+        return current
+
+    def __execute_kernelized(self, X, y):
+        current = np.zeros(len(y))
+        self.history.append(current)
+
+        for i in range(self.iterations):
+            j = random.randint(0, len(y) - 1)
+            decision = 0
+
+            for k in range(len(y)):
+                decision += current[k] * y[k] * self.kernel.map(X[j], X[k], self.gamma)
+            decision *= y[j] / (self.regularizer * (i + 1))
+            if decision < 1:
+                current[j] += 1
 
         return current
 
