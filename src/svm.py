@@ -67,7 +67,6 @@ class StepSizeRule(Enum):
     CONSTANT = "constant"
     DIMINISHING = "diminishing"
     POLYAK = "polyak"
-    BACKTRACKING = "backtracking"
 
     @staticmethod
     def by_name(name):
@@ -76,7 +75,7 @@ class StepSizeRule(Enum):
         except ValueError:
             raise ValueError(name + " is not a valid step size rule.")
 
-    def next_step(self, alpha, beta, iteration, X, y, f_opt, w, loss, regularizer):
+    def next_step(self, alpha, iteration, X, y, f_opt, w, loss, regularizer):
         if self == StepSizeRule.CONSTANT:
             return alpha
         elif self == StepSizeRule.DIMINISHING:
@@ -85,8 +84,6 @@ class StepSizeRule(Enum):
             subgradient = loss.subgradient_at(X, y, w, regularizer)
             return (loss.value_at(X, y, w, regularizer) - f_opt + (alpha / (iteration + 1))) / \
                    (subgradient.dot(subgradient))
-        elif self == StepSizeRule.BACKTRACKING:
-            return backtracking_line_search(alpha, beta, X, y, w, loss, regularizer)
 
 
 class Kernel(Enum):
@@ -119,7 +116,6 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
                  regularizer=1e-4,
                  step_size_rule="diminishing",
                  alpha=0.1,
-                 beta=0.1,
                  kernel="linear",
                  gamma=1e-3):
 
@@ -129,7 +125,6 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
         self.regularizer = regularizer
         self.step_size_rule = step_size_rule
         self.alpha = alpha
-        self.beta = beta
         self.kernel = kernel
         self.gamma = gamma
 
@@ -164,7 +159,7 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
         self.kernel_ = Kernel.by_name(self.kernel)
 
         descent = SubgradientDescent(self.loss_, self.iterations, self.batch_size, self.regularizer,
-                                     self.step_size_rule_, self.alpha, self.beta, self.kernel_, self.gamma)
+                                     self.step_size_rule_, self.alpha, self.kernel_, self.gamma)
         self.coef_ = descent.execute(X, y)
         self.history_ = descent.get_last_search_history()
 
@@ -243,15 +238,3 @@ class SubgradientSVMClassifier(ClassifierMixin, BaseEstimator):
 
     def _more_tags(self):
         return {'binary_only': True}
-
-
-def backtracking_line_search(alpha, beta, X, y, w, loss, regularizer):
-    t = 1
-    f_x = loss.value_at(X, y, w, regularizer)
-    d_x = loss.subgradient_at(X, y, w, regularizer)
-    d_x_squared = d_x.dot(d_x)
-
-    while loss.value_at(X, y, w - t * d_x) > f_x - t * alpha * d_x_squared:
-        t = beta * t
-
-    return t

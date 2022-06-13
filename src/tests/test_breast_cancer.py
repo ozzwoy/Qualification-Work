@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from sklearn.datasets import load_breast_cancer
@@ -34,3 +33,22 @@ def test_kernelized_svm(data):
     assert y_pred.shape == (X.shape[0],)
     # Assume that the accuracy is higher than 95% (actually ~98%)
     assert svm.score(X, y) > 0.95
+
+
+def test_polyak_step(data):
+    X, y = data
+    svm = SubgradientSVMClassifier(step_size_rule="polyak", alpha=10)
+    svm.fit(X, y)
+
+    # Assume that the accuracy is higher than 90% (actually ~93%)
+    assert svm.score(X, y) > 0.9
+
+    svm.set_params(**{"loss": "logistic"})
+    svm.fit(X, y)
+    # Assume that the accuracy is higher than 90% (actually ~92%)
+    assert svm.score(X, y) > 0.9
+
+    svm.set_params(**{"loss": "quadratic"})
+    svm.fit(X, y)
+    # Assume that the accuracy is higher than 85% (actually ~88%)
+    assert svm.score(X, y) > 0.85

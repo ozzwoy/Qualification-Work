@@ -13,7 +13,6 @@ class SubgradientDescent:
                  reularizer,
                  step_size_rule,
                  alpha,
-                 beta,
                  kernel,
                  gamma):
 
@@ -23,7 +22,6 @@ class SubgradientDescent:
         self.regularizer = reularizer
         self.step_size_rule = step_size_rule
         self.alpha = alpha
-        self.beta = beta
         self.kernel = kernel
         self.gamma = gamma
 
@@ -59,8 +57,7 @@ class SubgradientDescent:
                 if f < f_min:
                     f_min = f
 
-            step = self.step_size_rule.next_step(self.alpha, self.beta, i, X, y, f_min, current, self.loss,
-                                                 self.regularizer)
+            step = self.step_size_rule.next_step(self.alpha, i, X, y, f_min, current, self.loss, self.regularizer)
             current = current - step * subgradient
             self.history.append(current)
 
