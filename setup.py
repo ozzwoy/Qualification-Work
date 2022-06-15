@@ -10,15 +10,14 @@ with open(ver_file) as f:
 
 DISTNAME = 'subgradient-svm-classifier'
 DESCRIPTION = 'A package compatible with scikit-learn.'
-with codecs.open('README.rst', encoding='utf-8-sig') as f:
-    LONG_DESCRIPTION = f.read()
+LONG_DESCRIPTION = 'A package for binary classification using SVM method and subgradient approach'
 MAINTAINER = 'ozzwoy'
 MAINTAINER_EMAIL = 'ozzwoy@knu.ua'
-URL = 'https://github.com/scikit-learn-contrib/project-template'
+URL = 'https://github.com/ozzwoy/Qualification-Work'
 LICENSE = 'new BSD'
-DOWNLOAD_URL = 'https://github.com/scikit-learn-contrib/project-template'
+DOWNLOAD_URL = 'https://github.com/ozzwoy/Qualification-Work'
 VERSION = '0.0.3'
-INSTALL_REQUIRES = ['numpy', 'scipy', 'scikit-learn']
+INSTALL_REQUIRES = ['numpy', 'scikit-learn']
 CLASSIFIERS = ['Intended Audience :: Science/Research',
                'Intended Audience :: Developers',
                'License :: OSI Approved',

@@ -16,6 +16,7 @@ doc/datasets/generated/
 
 .Python
 env/
+venv/
 build/
 develop-eggs/
 dist/
